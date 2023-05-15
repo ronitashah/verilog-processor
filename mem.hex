@@ -1,0 +1,116 @@
+@0
+     // # this testcase outputs a (very simplistic) donut
+
+8011 // mov r1, 1 # treat r1 as a constant register with value 1 for increments/decrements
+80bf // mov r15, 11 # use this as a for loop limit
+816e // mov r14, y_loop_start # pointer to the start of the outer (y) loop
+900e
+886d // mov r13, y_loop_end # pointer to the end of the outer (y) loop
+900d
+81cc // mov r12, x_loop_start # pointer to the start of the inner (x) loop
+900c
+87eb // mov r11, x_loop_end # pointer to the end of the inner (x) loop
+900b
+
+8f62 // mov r2, -10 # r2 will contain the value of y, initialize to -10
+
+     // y_loop_start:
+
+0f23 // sub r3, r15, r2 # compare r2 (y) with the r15 (the for loop limit)
+e30d // jz r13, r3 # if y has reached the limit, jump to the end of the y for loop
+
+8f63 // mov r3, -10 # r3 will contain the value of x, initialize to -10
+
+     // x_loop_start:
+
+0f34 // sub r4, r15, r3 # compare r3 (x) with the r15 (the for loop limit)
+e40b // jz r11, r4 # if x has reached the limit, jump to the end of the x for loop
+
+8005 // mov r5, 0 # r5 will contain the sum x^2 + y^2, initialize to 0
+
+     // # take the absolute value of x and store it in r9
+82c8 // mov r8, after_negate_x # pointer to instruction after negating x
+9008
+0309 // sub r9, r3, r0 # copy r3 (x) to r9
+e938 // jns r8, r9 # if x is nonnegative, don't negate it (jump to instruction after it)
+0099 // sub r9, r0, r9 # negate r9 to make it nonnegative (r9 = 0 - r9)
+
+     // after_negate_x:
+
+0904 // sub r4, r9, r0 # copy the absolute value of x to r4 to use as a counter
+8366 // mov r6, sum_x_squared_start # pointer to the start of loop to get the x^2 value
+9006
+8407 // mov r7, done_with_x_squared # pointer to the end of the loop to get the x^2 value
+9007
+
+     // # add x x times to get x^2
+     // sum_x_squared_start:
+e407 // jz r7, r4 # once the counter reaches 0, go to the end of the x^2 loop
+0055 // add r5, r5, r9 # add the absolute value of x to the total
+0955
+0414 // sub r4, r4, r1 # decrement the counter
+e006 // jz r6, r0 # jump to the start of the x^2 loop
+
+     // done_with_x_squared:
+
+     // # take the absolute value of y and store it in r9
+84a8 // mov r8, after_negate_y # pointer to instruction after negating y
+9008
+0209 // sub r9, r2, r0 # copy r2 (y) to r9
+e938 // jns r8, r9 # if y is nonnegative, don't negate it (jump to instruction after it)
+0099 // sub r9, r0, r9 # negate r9 to make it nonnegative (r9 = 0 - r9)
+
+     // after_negate_y:
+
+0904 // sub r4, r9, r0 # copy the absolute value of y to r4 to use as a counter
+8546 // mov r6, sum_y_squared_start # pointer to the start of loop to get the y^2 value
+9006
+85e7 // mov r7, done_with_y_squared # pointer to the end of loop to get the y^2 value
+9007
+
+     // # add y y times to get y^2
+     // sum_y_squared_start:
+e407 // jz r7, r4 # once the counter reaches 0, go to the end of the y^2 loop
+0055 // add r5, r5, r9 # add the absolute value of y to the total
+0955
+0414 // sub r4, r4, r1 # decrement the counter
+e006 // jz r6, r0 # jump to the start of the y^2 loop
+
+     // done_with_y_squared:
+
+8766 // mov r6, not_part_of_donut # pointer to the instruction that prints a space
+9006
+
+8667 // mov r7, 102
+0578 // sub r8, r5, r7 # r8 = x^2 + y^2 - 102
+e836 // jns r6, r8 # if x^2 + y^2 - 102 >= 0, or x^2 + y^2 >= 102, then the current (x, y) not part of the donut
+
+8147 // mov r7, 20
+0578 // sub r8, r5, r7 # r8 = x^2 + y^2 - 20
+e826 // js r6, r8 # if x^2 + y^2 - 20 < 0, or x^2 + y^2 < 20, then the current (x, y) not part of the donut
+
+8230 // mov r0, '#' # did not jump, so (x, y) is part of the donut, so print a '#'
+
+8786 // mov r6, done_printing
+9006
+e006 // jz r6, r0 # jump past printing a space
+
+     // not_part_of_donut:
+
+8200 // mov r0, ' ' # (x, y) was not part of the donut, so print a space instead of a '#'
+
+     // done_printing:
+
+0033 // add r3, r3, r1 # increment r3 (x)
+0133
+e00c // jz r12, r0 # jump to the start of the x loop
+
+     // x_loop_end:
+
+80a0 // mov r0, '\n' # print a newline at the end of each x for loop
+0022 // add r2, r2, r1 # increment r2 (y)
+0122
+e00e // jz r14, r0 # jump to the start of the y for loop
+
+     // y_loop_end:
+ffff
